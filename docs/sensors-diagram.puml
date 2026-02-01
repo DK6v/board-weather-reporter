@@ -1,0 +1,95 @@
+@startuml sensors-diagram
+
+    class Measurement {
+        <<abstract>>
+        +send() void
+        +accept(visitor: MeasurementVisitor) void
+        +getType() string
+    }
+
+    class MeasurementVisitor {
+        <<interface>>
+        +visit(temp: TemperatureMeasurement) void
+        +visit(pressure: PressureMeasurement) void
+        +visit(humidity: HumidityMeasurement) void
+    }
+
+    class TemperatureMeasurement {
+        -value: double
+        +getValue() double
+        +send() void
+        +accept(visitor: MeasurementVisitor) void
+        +getType() string
+    }
+
+    class PressureMeasurement {
+        -value: int
+        +getValue() int
+        +send() void
+        +accept(visitor: MeasurementVisitor) void
+        +getType() string
+    }
+
+    class HumidityMeasurement {
+        -value: float
+        +getValue() float
+        +send() void
+        +accept(visitor: MeasurementVisitor) void
+        +getType() string
+    }
+
+    class SensorCollection {
+        -measurements: vector~shared_ptr~Measurement~~
+        +addMeasurement(measurement: T) void
+        +sendAll() void
+        +applyVisitor(visitor: MeasurementVisitor) void
+        +getMeasurementsOfType()~T~ vector~shared_ptr~T~~
+    }
+
+    class DetailedPrintVisitor {
+        +visit(temp: TemperatureMeasurement) void
+        +visit(pressure: PressureMeasurement) void
+        +visit(humidity: HumidityMeasurement) void
+    }
+
+    class ValidationVisitor {
+        -isValid: bool
+        -errorMessage: string
+        +visit(temp: TemperatureMeasurement) void
+        +visit(pressure: PressureMeasurement) void
+        +visit(humidity: HumidityMeasurement) void
+        +isValid() bool
+    }
+
+    class JsonSerializerVisitor {
+        +visit(temp: TemperatureMeasurement) void
+        +visit(pressure: PressureMeasurement) void
+        +visit(humidity: HumidityMeasurement) void
+    }
+
+    class StatisticsVisitor {
+        -tempSum: double
+        -tempCount: int
+        -pressureSum: int
+        -pressureCount: int
+        -humiditySum: float
+        -humidityCount: int
+        +visit(temp: TemperatureMeasurement) void
+        +visit(pressure: PressureMeasurement) void
+        +visit(humidity: HumidityMeasurement) void
+        +printStatistics() void
+    }
+
+    Measurement <|-- TemperatureMeasurement
+    Measurement <|-- PressureMeasurement
+    Measurement <|-- HumidityMeasurement
+
+    MeasurementVisitor <|.. DetailedPrintVisitor
+    MeasurementVisitor <|.. ValidationVisitor
+    MeasurementVisitor <|.. JsonSerializerVisitor
+    MeasurementVisitor <|.. StatisticsVisitor
+
+    SensorCollection o-- Measurement : contains
+    Measurement --> MeasurementVisitor : accepts
+
+@enduml
