@@ -48,7 +48,7 @@ size_t InfluxReporter::send(Client &client, uint32_t timestamp) {
 
         auto size = client.write(
             reinterpret_cast<const unsigned char*>(message.c_str()),
-            message.length() + 1);
+            message.length());
 
         client.flush();
         client.stop();
